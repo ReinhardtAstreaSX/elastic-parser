@@ -1,7 +1,0 @@
-mutate {
-      # Replace doubled double-quotes with single double-quote
-      # This normalizes CSV/Excel-escaped JSON to valid JSON spec
-      gsub => [
-        "[event][original]", '""', '"'
-      ]
-    }
