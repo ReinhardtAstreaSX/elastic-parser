@@ -1,0 +1,28 @@
+POST _ingest/pipeline/_simulate?verbose=true                       ← [A] The endpoint
+{
+  "pipeline": {                       ← [B] Inline pipeline definition
+    "processors": [                       ← [C] The processor type
+      {
+        "gsub": {
+          "field": "message",            ← [D] Input source field
+          "pattern": "^\"+|\"+$",
+          "replacement": ""
+        }
+      },
+      {
+        "json": {
+          "field": "message",
+          "target_field": "parsed",            ← [E] Output destination field
+          "tag": "_json_parse_failure"
+        }
+      }
+    ]
+  },
+  "docs": [                              ← [F] Test documents array
+    {
+      "_source": {
+        "message": "{\"user\":\"john\",\"action\":\"login\"}"  ← [G] Raw test payload
+      }
+    }
+  ]
+}
