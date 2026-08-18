@@ -1,27 +1,27 @@
-POST _ingest/pipeline/_simulate?verbose=true                       ← [A] The endpoint
+POST _ingest/pipeline/_simulate?verbose=true    ← [A] The endpoint — runs pipeline without indexing; ?verbose=true shows output after EACH processor step
 {
-  "pipeline": {                       ← [B] Inline pipeline definition
-    "processors": [                       ← [C] The processor type
+  "pipeline": {                                  ← [B] Inline pipeline definition — defined here instead of referencing a saved pipeline ID
+    "processors": [                              ← [C] Processor chain — array executes top-to-bottom, in order
       {
-        "gsub": {
-          "field": "message",            ← [D] Input source field
-          "pattern": "^\"+|\"+$",
-          "replacement": ""
+        "gsub": {                                ← [C1] Processor type — regex find/replace, runs FIRST to clean the raw string
+          "field": "message",                    ← [D1] Input source field — the raw field being sanitized before parsing
+          "pattern": "^\"+|\"+$",                ← [H] Regex pattern — matches one-or-more quotes at start (^) OR end ($) of the string
+          "replacement": ""                      ← [I] Replacement value — empty string deletes whatever the pattern matched
         }
       },
       {
-        "json": {
-          "field": "message",
-          "target_field": "parsed",            ← [E] Output destination field
-          "tag": "_json_parse_failure"
+        "json": {                                ← [C2] Processor type — parses a JSON string into a structured object, runs SECOND after cleanup
+          "field": "message",                    ← [D2] Input source field — now-cleaned string from the gsub step above
+          "target_field": "parsed",              ← [E] Output destination field — parsed keys land under "parsed.*" instead of overwriting root fields
+          "tag": "_json_parse_failure"           ← [J] Failure tag — labels this processor in simulate/failure output if JSON parsing throws an error
         }
       }
     ]
   },
-  "docs": [                              ← [F] Test documents array
+  "docs": [                                      ← [F] Test documents array — holds one or more sample events to run through the pipeline
     {
-      "_source": {
-        "message": "{\"user\":\"john\",\"action\":\"login\"}"  ← [G] Raw test payload
+      "_source": {                                ← [K] Document body — mimics the structure of a real Elasticsearch document
+        "message": "{\"user\":\"john\",\"action\":\"login\"}"  ← [G] Raw test payload — sample JSON string (already valid here, no wrapping quotes to strip)
       }
     }
   ]
